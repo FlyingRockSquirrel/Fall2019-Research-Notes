@@ -1,0 +1,72 @@
+\documentclass{article}
+\usepackage{amssymb}   
+\usepackage{amsthm}  
+\usepackage{amsmath}
+\usepackage{mathpartir}
+\usepackage{stmaryrd}
+\usepackage{mathtools}
+\begin{document}
+    \section{Types}
+    \begin{align*}
+        \tau := \mathbb{R}|(\tau \times \tau)|T\tau
+    \end{align*}
+    Where $\mathbb{R}$ are the real numbers and $T\tau$ are a distribution. 
+    \section{Expressions}
+        \begin{align*}
+            t := x\ |\ r\ |\ (t_1, t_2)\ |\ \pi_1 t\ |\ \pi_2 t\ |\ t_1 + t_2\ |\ t_1 - t_2\ |\ t_1 \times t_2\ |\ \frac{\delta t}{\delta x}\ |\ let\ x:= t_1\ in\ t_2\ |\ lift(t)|t_1;t_2
+        \end{align*}
+    \section{Typing Rules}
+        \begin{center}
+            $$\inferrule*[Left=Variable]{ }{\Gamma, x:\tau \vdash x:\tau}$$
+            $$\inferrule*[Left=Real Numbers]{ }{\Gamma \vdash r:\mathbb{R}}$$
+            $$\inferrule*[Left=Tuples]{\Gamma \vdash t_1:\tau_1, t_2:\tau_2}{\Gamma \vdash (t_1, t_2):(\tau_1 \times \tau_2)}$$
+            $$\inferrule*[Left=Left Projection]{\Gamma \vdash t:(\tau_1 \times \tau_2)}{\Gamma \vdash \pi_1t:\tau_1}$$
+            $$\inferrule*[Left=Right Projection]{\Gamma \vdash t:(\tau_1 \times \tau_2)}{\Gamma \vdash \pi_2t:\tau_2}$$
+            $$\inferrule*[Left=Addition]{\Gamma \vdash t_1, t_2:\tau}{\Gamma \vdash t_1 + t_2:\tau}$$
+            $$\inferrule*[Left=Subtraction]{\Gamma \vdash t_1, t_2:\tau}{\Gamma \vdash t_1 - t_2:\tau}$$
+            $$\inferrule*[Left=Multiplication]{\Gamma \vdash t_1, t_2:\tau}{\Gamma \vdash t_1 \times t_2:\tau}$$
+            $$\inferrule*[Left=Differentiation]{\Gamma, x \vdash t:T\tau '}{\Gamma, x \vdash \frac{\delta t}{\delta x}:T\tau'}$$
+            $$\inferrule*[Left=Let]{\Gamma \vdash t:\tau_1\ \ \ \ \Gamma, x:\tau_1 \vdash t_2:\tau_2}{\Gamma \vdash let\ x := t_1\ in\ t_2:\tau_2}$$
+            $$\inferrule*[Left=Lifting to Distribution]{\Gamma \vdash t:\tau}{\Gamma \vdash lift(t):T\tau}$$
+            $$\inferrule*[Left=Iteration]{\Gamma, x:\tau \vdash M:\tau}{\Gamma, x:\tau \vdash It\ n\ M:\tau}$$
+        \end{center}
+    \section{Semantics}
+    Type Domains:
+    \begin{center}
+        $$\llbracket \mathbb{R} \rrbracket = \mathbb{R}_\bot$$
+        $$\llbracket \tau \times \tau \rrbracket = \llbracket \tau \rrbracket \times \llbracket \tau \rrbracket$$
+        $$\llbracket T\tau \rrbracket = increasing\ confusion$$
+    \end{center}
+    Not quite sure how to deal with semantics without cpo's? I assume that we have a bottom element for distributions? I was thinking about potentially having $Tm \sqsubseteq Tm'$ if $Tm = \frac{\delta m}{\delta x} Tm'$, but that runs into issues with suprema because you don't have least upper bounds. Also it doesn't really give you too much useful information that I can think of. The other idea that I was thinking about was if a distribution Ta was greater than another distribution Tb at all values for all test functions it could work but again I think I run into the least upper bound issue. Perhaps if we worked with the greater than or equal to using the flat reals? I don't think quite have the knowledge that I need to fully explore this idea. I'll have to go digging a little. For now, here's the denotational semantics for the iteration that we came up with last week:
+    \begin{center}
+        $It$ $n$ $M:\tau$ = $\llbracket \Gamma \rrbracket \xrightarrow{\langle id, \llbracket init \rrbracket \rangle}\llbracket \Gamma \rrbracket \times \llbracket \tau \rrbracket \xrightarrow{\langle id, \llbracket M \rrbracket \rangle}\llbracket \Gamma \rrbracket \times \llbracket \tau \rrbracket \xrightarrow{\langle id, \llbracket M \rrbracket \rangle}... \xrightarrow{\langle \llbracket M \rrbracket \rangle} \llbracket \tau \rrbracket$
+    \end{center}
+    Intuitively, this iterator constructs an initial variable, adds it to the type environment (kind of) and then the term M acts on it and the iterator accumulates the effects of M n times. 
+    \section{Other thoughts}
+    I still don't quite understand how we define $\llbracket T\tau \rrbracket$ without a cpo. Additionally, I've gone looking for some resources for differential geometry but most of the undergraduate accessible books that I saw as recommendations on stack exchange were either topologically focused or not available at the library for whatever reason. Lastly, I didn't include division because I felt dividing by zero might throw us an issue if we don't have a bottom element for distributions but that I feel is a relatively easy problem to solve. 
+    
+    //TODO: read up on continuation passing style and watch lecture and read paper. Especially look into semantics of continuation passing style and how it looks similar to definition of distributions. Finally, read up on nondeterminism if you have time. 
+    
+    \section{Continuation Passing Style}
+    High level idea: We throw an extra argument f' into every function f which is what we want to do with the function when we're done with f. In a sense, we're inverting the syntactically inverting function composition. I'm under the assumption that this kind of nests the semantics? I can see how this could solve our problem with weird removable jump discontinuities by kind of unfolding the semantics of continuation passing style?
+    
+    \section{Lecture notes}
+    Operational semantics don't look too out of the ordinary
+    Terminology/notation:
+    Trace: Differentiable term via the chain rule
+    \newline
+    $\implies$ evaluates to value
+    \newline
+    $\rightsquigarrow$ steps to a trace term
+    \newline
+    I'm kind of a little confused as to how this is working. The example given is a conditional with two trace terms. First you evaluate the boolean and then just differentiate the trace taken. However, this doesn't really deal with the removable discontinuity example given last week.
+    \newline
+    The core idea that I'm getting this is evaluate the control flow, and then just evaluate the traces via the chain rule. 
+    \newline
+    \section{Topology Digression - need better intuition about open sets}
+    
+    \section{Paper Notes}
+    
+    \section{Other thoughts}
+    I'm almost thinking that we should go the other way? Rather than lifting to trace terms, we have a functor that takes us away from trace terms and a functor that takes us back to the trace terms, and we start in trace terms. 
+\end{document}
