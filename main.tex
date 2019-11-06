@@ -6,12 +6,12 @@
 \usepackage{stmaryrd}
 \usepackage{mathtools}
 \begin{document}
-    \section{Types}
+    \section{Differentiable Types}
     \begin{align*}
         \tau := \mathbb{R}|(\tau \times \tau)|T\tau
     \end{align*}
     Where $\mathbb{R}$ are the real numbers and $T\tau$ are a distribution. 
-    \section{Expressions}
+    \section{Differentiable Expressions}
         \begin{align*}
             t := x\ |\ r\ |\ (t_1, t_2)\ |\ \pi_1 t\ |\ \pi_2 t\ |\ t_1 + t_2\ |\ t_1 - t_2\ |\ t_1 \times t_2\ |\ \frac{\delta t}{\delta x}\ |\ let\ x:= t_1\ in\ t_2\ |\ lift(t)|t_1;t_2
         \end{align*}
@@ -30,7 +30,23 @@
             $$\inferrule*[Left=Lifting to Distribution]{\Gamma \vdash t:\tau}{\Gamma \vdash lift(t):T\tau}$$
             $$\inferrule*[Left=Iteration]{\Gamma, x:\tau \vdash M:\tau}{\Gamma, x:\tau \vdash It\ n\ M:\tau}$$
         \end{center}
-    \section{Semantics}
+    \section{Boolean Types}
+        \begin{align*}
+            \mathbb{B} := bool \in \{True, False\}
+        \end{align*}
+    \section{Boolean Expressions}
+        \begin{align*}
+            \beta := b \in \mathbb{B}| \beta \wedge \beta|\beta \vee \beta\|\neg \beta|r_1 < r_2|r_1 = r_2|r_1 > r_2
+        \end{align*}
+    \section{Boolean Syntax}
+        $$\inferrule*[Left=Boolean Primitive]{ }{\Gamma \vdash b:b}$$
+        $$\inferrule*[Left=Boolean And]{\Gamma \vdash b_1:\mathbb{B}_1, b_2:\mathbb{B}_2}{\Gamma \vdash b_1 \wedge b_2:bool}$$
+        $$\inferrule*[Left=Boolean Or]{\Gamma \vdash b_1:\mathbb{B}_1, b_2:\mathbb{B}_2}{\Gamma \vdash b_1 \vee b_2:bool}$$
+        $$\inferrule*[Left=Boolean Negation]{\Gamma \vdash b:\mathbb{B}}{\Gamma \vdash \neg b_1:bool}$$
+        $$\inferrule*[Left=Less Than]{\Gamma \vdash r_1:\tau, r_2:\tau}{\Gamma \vdash r_1 < r_2:bool}$$
+        $$\inferrule*[Left=Equality]{\Gamma \vdash r_1:\tau, r_2:\tau}{\Gamma \vdash r_1 = r_2:bool}$$
+        $$\inferrule*[Left=Greater Than]{\Gamma \vdash r_1:\tau, r_2:\tau}{\Gamma \vdash r_1 > r_2:bool}$$
+    \section{Differentiable Semantics}
     Type Domains:
     \begin{center}
         $$\llbracket \mathbb{R} \rrbracket = \mathbb{R}_\bot$$
@@ -42,13 +58,33 @@
         $It$ $n$ $M:\tau$ = $\llbracket \Gamma \rrbracket \xrightarrow{\langle id, \llbracket init \rrbracket \rangle}\llbracket \Gamma \rrbracket \times \llbracket \tau \rrbracket \xrightarrow{\langle id, \llbracket M \rrbracket \rangle}\llbracket \Gamma \rrbracket \times \llbracket \tau \rrbracket \xrightarrow{\langle id, \llbracket M \rrbracket \rangle}... \xrightarrow{\langle \llbracket M \rrbracket \rangle} \llbracket \tau \rrbracket$
     \end{center}
     Intuitively, this iterator constructs an initial variable, adds it to the type environment (kind of) and then the term M acts on it and the iterator accumulates the effects of M n times. 
+    \newline
+    Let binding:
+    \begin{center}
+        Let $x = M_1:\tau_1$ in $M_2:\tau_2$: $\llbracket \Gamma \rrbracket \xrightarrow{\langle id, \llbracket M_1/x \rrbracket \rangle} \llbracket \Gamma \rrbracket \times \llbracket \tau_1 \rrbracket  \xrightarrow{\llbracket M_2 \rrbracket} \llbracket \tau_2 \rrbracket$
+    \end{center}
+    Lift:
+    \begin{center}
+        Lift($M:\tau$)\\
+        \begin{cases}
+        $\llbracket \tau \rrbracket$ & $\text{if $\tau = T\tau'$}$\\
+        \llbracket \Gamma \rrbracket \xrightarrow{\langle id, \llbracket M \rrbracket \rangle} \llbracket \Gamma \rrbracket \times \llbracket \tau \rrbracket \xrightarrow{Lift} \llbracket T\tau \rrbracket & \text{Otherwise}
+        \end{cases}
+    \end{center}
+    Differentiation:
+    \begin{center}
+        $\frac{\delta t}{\delta x}M:\tau$\\
+        \begin{cases}
+            \llbracket \Gamma \rrbracket \xrightarrow{\langle id, \llbracket M \rrbracket \rangle} \llbracket \Gamma \rrbracket \times \llbracket \tau \rrbracket \xrightarrow{\frac{\delta t}{\delta x}} \llbracket \tau \rrbracket & \text{if $\tau = T\tau'$}\\
+            \llbracket \Gamma \rrbracket \xrightarrow{\langle id, \llbracket M \rrbracket \rangle} \llbracket \Gamma \rrbracket \times \llbracket \tau \rrbracket \xrightarrow{Lift} \llbracket \Gamma \rrbracket \times \llbracket T\tau \rrbracket \xrightarrow{\frac{\delta t}{\delta x}} \llbracket T\tau \rrbracket & \text{Otherwise}
+        \end{cases}
+    \end{center}
     \section{Other thoughts}
     I still don't quite understand how we define $\llbracket T\tau \rrbracket$ without a cpo. Additionally, I've gone looking for some resources for differential geometry but most of the undergraduate accessible books that I saw as recommendations on stack exchange were either topologically focused or not available at the library for whatever reason. Lastly, I didn't include division because I felt dividing by zero might throw us an issue if we don't have a bottom element for distributions but that I feel is a relatively easy problem to solve. 
     
-    //TODO: read up on continuation passing style and watch lecture and read paper. Especially look into semantics of continuation passing style and how it looks similar to definition of distributions. Finally, read up on nondeterminism if you have time. 
     
     \section{Continuation Passing Style}
-    High level idea: We throw an extra argument f' into every function f which is what we want to do with the function when we're done with f. In a sense, we're inverting the syntactically inverting function composition. I'm under the assumption that this kind of nests the semantics? I can see how this could solve our problem with weird removable jump discontinuities by kind of unfolding the semantics of continuation passing style?
+    High level idea: We throw an extra argument f' into every function f which is what we want to do with the function when we're done with f. In a sense, we're inverting the syntactically inverting function composition. I'm under the assumption that this kind of nests the semantics?
     
     \section{Lecture notes}
     Operational semantics don't look too out of the ordinary
@@ -63,10 +99,16 @@
     \newline
     The core idea that I'm getting this is evaluate the control flow, and then just evaluate the traces via the chain rule. 
     \newline
-    \section{Topology Digression - need better intuition about open sets}
-    
+    \section{Topology Digression}
+    TODO: Need better intuition about open sets and covers to really understand what's going on
+    \newline
+    Open sets are basically delta epsilon proofs of continuity but for sets
+    \newline
+    An open cover of a set $X$ is a set $C$ such that $X \subseteq C$
+    \newline
+    Covers are most often used in topology for figuring out what union of sets $U_i$ form a cover of the topology. Question: is this because we want to figure out how we can construct topological spaces using other topological spaces? This is useful because we know that the union of open sets is itself open? That's the intuition behind it that I'm looking at right now. 
     \section{Paper Notes}
     
     \section{Other thoughts}
-    I'm almost thinking that we should go the other way? Rather than lifting to trace terms, we have a functor that takes us away from trace terms and a functor that takes us back to the trace terms, and we start in trace terms. 
+    % I'm almost thinking that we should go the other way? Rather than lifting to trace terms, we have a functor that takes us away from trace terms and a functor that takes us back to the trace terms, and we start in trace terms. Perhaps a design decision? 
 \end{document}
